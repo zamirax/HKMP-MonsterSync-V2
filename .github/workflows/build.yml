@@ -24,21 +24,31 @@ jobs:
     - name: Install Mono
       run: sudo apt-get install -y mono-devel
 
-    - name: Download ModdingAPI DLLs
+    - name: Download ModdingAPI and HKMP DLLs
       run: |
         mkdir -p Libs
-        curl -L "https://github.com/hk-modding/api/releases/download/v74/moddingapi.v74.windows.zip" -o ModdingAPI.zip
-        file ModdingAPI.zip
+
+        # Get latest ModdingAPI release download URL dynamically
+        MODDING_URL=$(curl -s https://api.github.com/repos/hk-modding/api/releases/latest \
+          | grep "browser_download_url" \
+          | grep -i "windows" \
+          | cut -d '"' -f 4 | head -1)
+        echo "ModdingAPI URL: $MODDING_URL"
+        curl -L "$MODDING_URL" -o ModdingAPI.zip
         unzip -o ModdingAPI.zip -d ModdingAPIExtracted
         find ModdingAPIExtracted -name "*.dll" -exec cp {} Libs/ \;
-        ls Libs/
 
-    - name: Download HKMP DLLs
-      run: |
-        curl -L "https://github.com/Extremelyd1/HKMP/releases/latest/download/HKMP.zip" -o HKMP.zip
-        file HKMP.zip
+        # Get latest HKMP release download URL dynamically
+        HKMP_URL=$(curl -s https://api.github.com/repos/Extremelyd1/HKMP/releases/latest \
+          | grep "browser_download_url" \
+          | grep -i "\.zip" \
+          | cut -d '"' -f 4 | head -1)
+        echo "HKMP URL: $HKMP_URL"
+        curl -L "$HKMP_URL" -o HKMP.zip
         unzip -o HKMP.zip -d HKMPExtracted
         find HKMPExtracted -name "*.dll" -exec cp {} Libs/ \;
+
+        echo "DLLs found:"
         ls Libs/
 
     - name: Update csproj to use local DLLs
