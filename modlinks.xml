@@ -1,0 +1,12 @@
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;ModLinks xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
+  &lt;Name&gt;HollowKnightHKMPMod&lt;/Name&gt;
+  &lt;Version&gt;1.0.0&lt;/Version&gt;
+  &lt;Description&gt;A mod that syncs mob and boss health from host to all players, and gives soul to all players when any player attacks mobs.&lt;/Description&gt;
+  &lt;Author&gt;HollowKnightHKMPMod&lt;/Author&gt;
+  &lt;Website&gt;https://github.com/&lt;/Website&gt;
+  &lt;Dependencies&gt;
+    &lt;Dependency&gt;HKMP&lt;/Dependency&gt;
+    &lt;Dependency&gt;ModdingAPI&lt;/Dependency&gt;
+  &lt;/Dependencies&gt;
+&lt;/ModLinks&gt;
