@@ -19,16 +19,41 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '6.0.x'
+        dotnet-version: '8.0.x'
 
     - name: Install Mono
       run: sudo apt-get install -y mono-devel
 
-    - name: Restore dependencies
-      run: dotnet restore
+    - name: Download HKMP and ModdingAPI DLLs
+      run: |
+        mkdir -p Libs
+        curl -L "https://github.com/hk-modding/api/releases/latest/download/ModdingApiWin.zip" -o ModdingAPI.zip
+        unzip -o ModdingAPI.zip -d ModdingAPIExtracted
+        find ModdingAPIExtracted -name "*.dll" -exec cp {} Libs/ \;
+        curl -L "https://github.com/Extremelyd1/HKMP/releases/latest/download/HKMP.zip" -o HKMP.zip
+        unzip -o HKMP.zip -d HKMPExtracted
+        find HKMPExtracted -name "*.dll" -exec cp {} Libs/ \;
+
+    - name: Update csproj to use local DLLs
+      run: |
+        cat > HollowKnightHKMPMod.csproj << 'EOF'
+        <Project Sdk="Microsoft.NET.Sdk">
+          <PropertyGroup>
+            <TargetFramework>net472</TargetFramework>
+            <AssemblyTitle>HollowKnightHKMPMod</AssemblyTitle>
+            <AssemblyVersion>1.0.0</AssemblyVersion>
+          </PropertyGroup>
+          <ItemGroup>
+            <Reference Include="*.dll">
+              <HintPath>Libs\%(Filename)%(Extension)</HintPath>
+              <Private>false</Private>
+            </Reference>
+          </ItemGroup>
+        </Project>
+        EOF
 
     - name: Build
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build --configuration Release
 
     - name: Upload DLL
       uses: actions/upload-artifact@v4
