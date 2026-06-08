@@ -1,0 +1,35 @@
+name: Build Mod
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '6.0.x'
+
+    - name: Install .NET Framework 4.7.2 targeting pack
+      run: |
+        sudo apt-get install -y mono-devel
+        
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+
+    - name: Upload DLL
+      uses: actions/upload-artifact@v3
+      with:
+        name: HollowKnightHKMPMod
+        path: '**/bin/Release/**/*.dll'
