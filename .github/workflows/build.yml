@@ -24,15 +24,22 @@ jobs:
     - name: Install Mono
       run: sudo apt-get install -y mono-devel
 
-    - name: Download HKMP and ModdingAPI DLLs
+    - name: Download ModdingAPI DLLs
       run: |
         mkdir -p Libs
-        curl -L "https://github.com/hk-modding/api/releases/latest/download/ModdingApiWin.zip" -o ModdingAPI.zip
+        curl -L "https://github.com/hk-modding/api/releases/download/v74/moddingapi.v74.windows.zip" -o ModdingAPI.zip
+        file ModdingAPI.zip
         unzip -o ModdingAPI.zip -d ModdingAPIExtracted
         find ModdingAPIExtracted -name "*.dll" -exec cp {} Libs/ \;
+        ls Libs/
+
+    - name: Download HKMP DLLs
+      run: |
         curl -L "https://github.com/Extremelyd1/HKMP/releases/latest/download/HKMP.zip" -o HKMP.zip
+        file HKMP.zip
         unzip -o HKMP.zip -d HKMPExtracted
         find HKMPExtracted -name "*.dll" -exec cp {} Libs/ \;
+        ls Libs/
 
     - name: Update csproj to use local DLLs
       run: |
@@ -45,7 +52,7 @@ jobs:
           </PropertyGroup>
           <ItemGroup>
             <Reference Include="*.dll">
-              <HintPath>Libs\%(Filename)%(Extension)</HintPath>
+              <HintPath>Libs/%(Filename)%(Extension)</HintPath>
               <Private>false</Private>
             </Reference>
           </ItemGroup>
