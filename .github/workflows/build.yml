@@ -28,7 +28,6 @@ jobs:
       run: |
         mkdir -p Libs
 
-        # Get latest ModdingAPI release download URL dynamically
         MODDING_URL=$(curl -s https://api.github.com/repos/hk-modding/api/releases/latest \
           | grep "browser_download_url" \
           | grep -i "windows" \
@@ -38,7 +37,6 @@ jobs:
         unzip -o ModdingAPI.zip -d ModdingAPIExtracted
         find ModdingAPIExtracted -name "*.dll" -exec cp {} Libs/ \;
 
-        # Get latest HKMP release download URL dynamically
         HKMP_URL=$(curl -s https://api.github.com/repos/Extremelyd1/HKMP/releases/latest \
           | grep "browser_download_url" \
           | grep -i "\.zip" \
@@ -48,26 +46,34 @@ jobs:
         unzip -o HKMP.zip -d HKMPExtracted
         find HKMPExtracted -name "*.dll" -exec cp {} Libs/ \;
 
-        echo "DLLs found:"
+        echo "=== DLLs found ==="
         ls Libs/
 
-    - name: Update csproj to use local DLLs
+    - name: Generate csproj with explicit references
       run: |
-        cat > HollowKnightHKMPMod.csproj << 'EOF'
+        # Build individual Reference entries for every DLL in Libs/
+        REFS=""
+        for dll in Libs/*.dll; do
+          name=$(basename "$dll" .dll)
+          REFS="$REFS<Reference Include=\"$name\"><HintPath>$dll</HintPath><Private>false</Private></Reference>"$'\n'
+        done
+
+        cat > HollowKnightHKMPMod.csproj << EOF
         <Project Sdk="Microsoft.NET.Sdk">
           <PropertyGroup>
             <TargetFramework>net472</TargetFramework>
             <AssemblyTitle>HollowKnightHKMPMod</AssemblyTitle>
             <AssemblyVersion>1.0.0</AssemblyVersion>
+            <Nullable>enable</Nullable>
           </PropertyGroup>
           <ItemGroup>
-            <Reference Include="*.dll">
-              <HintPath>Libs/%(Filename)%(Extension)</HintPath>
-              <Private>false</Private>
-            </Reference>
+            $REFS
           </ItemGroup>
         </Project>
         EOF
+
+        echo "=== Generated csproj ==="
+        cat HollowKnightHKMPMod.csproj
 
     - name: Build
       run: dotnet build --configuration Release
