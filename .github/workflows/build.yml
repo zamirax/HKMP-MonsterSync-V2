@@ -46,12 +46,13 @@ jobs:
         unzip -o HKMP.zip -d HKMPExtracted
         find HKMPExtracted -name "*.dll" -exec cp {} Libs/ \;
 
-        echo "=== DLLs found ==="
-        ls Libs/
+        echo "=== ALL DLLs in Libs ==="
+        ls -la Libs/
+        echo "=== Checking for HKMP specifically ==="
+        find Libs/ -iname "*hkmp*" -o -iname "*HKMP*"
 
     - name: Generate csproj with explicit references
       run: |
-        # Build individual Reference entries for every DLL in Libs/
         REFS=""
         for dll in Libs/*.dll; do
           name=$(basename "$dll" .dll)
@@ -62,6 +63,7 @@ jobs:
         <Project Sdk="Microsoft.NET.Sdk">
           <PropertyGroup>
             <TargetFramework>net472</TargetFramework>
+            <LangVersion>9.0</LangVersion>
             <AssemblyTitle>HollowKnightHKMPMod</AssemblyTitle>
             <AssemblyVersion>1.0.0</AssemblyVersion>
           </PropertyGroup>
