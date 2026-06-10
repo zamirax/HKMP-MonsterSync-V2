@@ -26,13 +26,27 @@ jobs:
           | grep "browser_download_url" \
           | grep -i "windows" \
           | cut -d '"' -f 4 | head -1)
-        echo "ModdingAPI URL: $MODDING_URL"
+        echo "ModdingAPI Windows URL: $MODDING_URL"
         curl -L "$MODDING_URL" -o ModdingAPI.zip
         unzip -o ModdingAPI.zip -d ModdingAPIExtracted
         find ModdingAPIExtracted -name "*.dll" | while read f; do
           echo "Found: $f"
           cp "$f" Libs/
         done
+        MODDING_LINUX_URL=$(curl -s https://api.github.com/repos/hk-modding/api/releases/latest \
+          | grep "browser_download_url" \
+          | grep -iv "windows" \
+          | grep "\.zip" \
+          | cut -d '"' -f 4 | head -1)
+        echo "ModdingAPI Linux URL: $MODDING_LINUX_URL"
+        curl -L "$MODDING_LINUX_URL" -o ModdingAPILinux.zip
+        unzip -o ModdingAPILinux.zip -d ModdingAPILinuxExtracted
+        find ModdingAPILinuxExtracted -name "*.dll" | while read f; do
+          echo "Found: $f"
+          cp "$f" Libs/ 2>/dev/null || true
+        done
+        echo "=== Final Libs after ModdingAPI ==="
+        ls -la Libs/
     - name: Download HKMP
       run: |
         HKMP_URL=$(curl -s https://api.github.com/repos/Extremelyd1/HKMP/releases/latest \
