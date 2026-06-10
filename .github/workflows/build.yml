@@ -62,7 +62,36 @@ jobs:
 
     - name: Generate csproj
       run: |
-        REFS=""
-        for dll in Libs/*.dll; do
-          name=$(basename "$dll" .dll)
-          REFS
+        python3 << 'PYEOF'
+        import os
+        import glob
+
+        dlls = glob.glob('Libs/*.dll')
+        refs = '\n'.join(
+            f'    <Reference Include="{os.path.basename(d)[:-4]}">'
+            f'<HintPath>{d}</HintPath>'
+            f'<Private>false</Private></Reference>'
+            for d in dlls
+        )
+
+        csproj = f'''<Project Sdk="Microsoft.NET.Sdk">
+          <PropertyGroup>
+            <TargetFramework>net472</TargetFramework>
+            <LangVersion>9.0</LangVersion>
+            <AssemblyTitle>HollowKnightHKMPMod</AssemblyTitle>
+            <AssemblyVersion>1.0.0</AssemblyVersion>
+          </PropertyGroup>
+          <ItemGroup>
+        {refs}
+          </ItemGroup>
+        </Project>'''
+
+        with open('HollowKnightHKMPMod.csproj', 'w') as f:
+            f.write(csproj)
+
+        print("=== Generated csproj ===")
+        print(csproj)
+        print(f"=== Referenced {len(dlls)} DLLs ===")
+        for d in dlls:
+            print(d)
+        PYEOF
